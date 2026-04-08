@@ -4,8 +4,6 @@ FROM ghcr.io/astral-sh/uv:python3.12-alpine AS base
 # Force uv to use the system location for python packages
 ENV UV_PROJECT_ENVIRONMENT="/usr/local/"
 
-RUN apk add --no-cache curl
-
 # Copy source and requirements
 WORKDIR /back
 
