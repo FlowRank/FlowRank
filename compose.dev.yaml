@@ -1,7 +1,7 @@
 name: dev-flowrank
 services:
   frontend:
-    # image:
+    container_name: front
     build:
       context: ./front
       target: development
@@ -13,7 +13,7 @@ services:
       - 5173:5173
 
   backend:
-    # image:
+    container_name: back
     build:
       context: ./back
       dockerfile: Dockerfile
@@ -24,28 +24,11 @@ services:
     volumes:
       - ./back:/back
 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
-      start_period: 30s
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports:
-      - 5002:5000
-
   postgres:
+    container_name: db
     image: postgres:17-alpine
     env_file:
       - .env
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      start_period: 10s
-      interval: 5s
-      timeout: 5s
-      retries: 5
     restart: unless-stopped
     volumes:
       - database:/var/lib/postgresql/data
