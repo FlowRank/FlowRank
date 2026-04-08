@@ -1,7 +1,0 @@
-{
-    "name": "FlowRank",
-    "private": true,
-    "workspaces": [
-      "front"
-    ]
-  }
