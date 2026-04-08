@@ -36,16 +36,15 @@ RUN pnpm run build
 # Production stage
 FROM nginx:1.27-alpine AS production
 
-# Set working directory
+RUN apk add --no-cache openssl \
+    && mkdir -p /etc/nginx/ssl \
+    && openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/nginx/ssl/nginx.key \
+        -out /etc/nginx/ssl/nginx.crt \
+        -subj "/CN=localhost"
+
 WORKDIR /usr/share/nginx/html
 
-# Copy Nginx configuration and entrypoint script
-COPY ./nginx.conf /etc/nginx/nginx.conf 
-#TODO: conf does not exist and prod deployment does not work, create it
-# COPY ./frontend-entrypoint.sh /
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
-# Copy the built application from the build stage
-COPY --from=build /front/dist/frontend /usr/share/nginx/html
-
-# Command to run the Nginx server
-# CMD ["sh", "/frontend-entrypoint.sh"]
+COPY --from=build /front/dist/ /usr/share/nginx/html/

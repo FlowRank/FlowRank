@@ -6,6 +6,8 @@ services:
       context: ./front
       target: development
     restart: unless-stopped
+    env_file:
+      - .env
     volumes:
       - ./front:/front
       - /front/node_modules/
