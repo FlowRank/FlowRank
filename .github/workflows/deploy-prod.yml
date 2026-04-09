@@ -3,7 +3,7 @@ name: Deploy production
 on:
   push:
     branches: ["main","feat-86c98mxud-auto-prod-deployment"]
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 concurrency:
   group: deploy-production
