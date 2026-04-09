@@ -25,7 +25,7 @@ COPY ./ /front
 FROM node AS development
 
 # Command to run the React app in development mode
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "dev", "--host", "0.0.0.0"]
 
 # Build stage
 FROM node AS build
