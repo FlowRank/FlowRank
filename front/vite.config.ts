@@ -8,6 +8,7 @@ const apiProxyTarget =
 export default defineConfig({
   plugins: [react()],
   server: {
+    allowedHosts: ['localhost', '127.0.0.1', 'flowrank.tigropoil.fr'],
     host: '0.0.0.0',
     port: 5173,
     proxy: {
