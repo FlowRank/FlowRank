@@ -1,16 +1,14 @@
 name: prod-flowrank
 services:
-  # frontend:
-  #   # image:
-  #   build:
-  #     context: ./front
-  #     target: development
-  #   restart : unless-stopped
-  #   volumes:
-  #     - ./front:/front
-  #     - ./front/node_modules/
-  #   ports:
-  #     - 5173:5173
+  frontend:
+    build:
+      context: ./front
+      target: production
+    restart: unless-stopped
+    ports:
+      - 80:80
+    depends_on:
+      - backend
 
   backend:
     # image:
