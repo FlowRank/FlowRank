@@ -3,7 +3,7 @@ name: Deploy production
 on:
   push:
     branches: ["main","feat-86c98mxud-auto-prod-deployment"]
-    
+
   workflow_dispatch:
 
 concurrency:
@@ -38,7 +38,7 @@ jobs:
           ssh -p "$PROD_PORT" "$PROD_USER@$PROD_HOST" 'bash -lc "
             set -euo pipefail
 
-            cd ~/flowrank
+            cd ~/FlowRank
 
             git fetch --all --prune
             git reset --hard origin/main
