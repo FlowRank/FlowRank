@@ -33,6 +33,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create .env file
+        run: |
+          cp .env.example .env
+
       - name: Build with Bake from compose.prod.yaml
         uses: docker/bake-action@v6
         with:
