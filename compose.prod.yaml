@@ -1,6 +1,7 @@
 name: prod-flowrank
 services:
   frontend:
+    image: ghcr.io/flowrank/flowrank-frontend:${IMAGE_TAG:-latest}
     build:
       context: ./front
       target: production
@@ -11,15 +12,13 @@ services:
       - backend
 
   backend:
-    # image:
+    image: ghcr.io/flowrank/flowrank-backend:${IMAGE_TAG:-latest}
     build:
       context: ./back
       target: production
     env_file:
       - .env
     restart: unless-stopped
-    volumes:
-      - ./back:/back
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]
