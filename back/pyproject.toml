@@ -12,6 +12,9 @@ dev = [
     "mypy>=1.20.0",
     "ruff>=0.15.10",
 ]
+prod = [
+    "uvicorn>=0.44.0",
+]
 
 [build-system]
 requires = ["hatchling"]
