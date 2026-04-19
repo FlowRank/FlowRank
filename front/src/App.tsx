@@ -1,14 +1,14 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import Accueil from "./components/Accueil/Accueil";
-import CreationCompte from "./components/CompteCreation/CreationCompte";
+import CreateAccount from "./components/CreateAccount/CreateAccount";
+import Login from "./components/Login/Login";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/connexion" replace />} />
-      <Route path="/connexion" element={<Accueil />} />
-      <Route path="/creationCompte" element={<CreationCompte />} />
-      <Route path="*" element={<Navigate to="/connexion" replace />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/create-account" element={<CreateAccount />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
