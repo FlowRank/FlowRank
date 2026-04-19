@@ -1,33 +1,20 @@
-### Stage 1: Base stage ####
 FROM ghcr.io/astral-sh/uv:python3.12-alpine AS base
 
-# Force uv to use the system location for python packages
 ENV UV_PROJECT_ENVIRONMENT="/usr/local/"
 
-# Copy source and requirements
-WORKDIR /back
+WORKDIR /app
 
-# Install Python dependencies (with cache)
+# Au lieu de faire un bind mount, on COPIE les fichiers
+# Comme ça uv peut écrire dessus s'il a besoin de les corriger
+COPY uv.lock pyproject.toml ./
+
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=./uv.lock \
-    --mount=type=bind,source=./pyproject.toml,target=./pyproject.toml \
-    uv sync --no-install-workspace --package back-flowrank --no-group prod --no-group dev --frozen
-
-### Stage 2: Development stage ####
+    uv sync --no-install-workspace --package back-flowrank --no-group dev
 FROM base AS development
+
 ENV APP_ENV=dev
 
-# Install Python dev dependencies (with cache)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=./uv.lock \
-    --mount=type=bind,source=./pyproject.toml,target=./pyproject.toml \
-    uv sync --no-install-workspace --package back-flowrank --no-group prod --group dev --frozen
-
-# Copy sources
-COPY --chmod=755 ./ /back/
-
-CMD ["fastapi", "dev", "app/app.py", "--host", "0.0.0.0", "--port", "5000"]
-
+CMD ["uvicorn", "back.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]
 ### Stage 3: Production stage ####
 FROM base AS production-deps
 
@@ -40,12 +27,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 FROM python:3.12-alpine AS production
 
 ENV APP_ENV=prod
-
 COPY --from=production-deps /usr/local/ /usr/local/
+ENV PYTHONPATH=/app
+WORKDIR /app
+COPY . /app
 
-WORKDIR /back
-
-# Copy sources
-COPY --chmod=755 ./ ./
-
-CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]

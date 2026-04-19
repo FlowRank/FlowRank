@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, Text
 
-from connection import BaseAccount
+from back.dao.connection import BaseData
 
 
-class Compte(BaseAccount):
+class Compte(BaseData):
     __tablename__ = "compte"
 
     id = Column(Integer, primary_key=True)

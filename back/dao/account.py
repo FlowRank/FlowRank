@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from models import Compte
-from schemas.account import AccountSchema
+from back.dao.models import Compte
+from back.dao.schemas.account import AccountSchema
 
 
 class CompteDao:
