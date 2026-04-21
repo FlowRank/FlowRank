@@ -8,7 +8,8 @@ dependencies = [
     "SQLAlchemy>=2.0.35",
     "psycopg[binary]",
     "bcrypt>=4.2.0",
-    "PyJWT >= 2.9.0"
+    "PyJWT >= 2.9.0",
+    "uvicorn>=0.44.0",
 ]
 
 [dependency-groups]
@@ -17,7 +18,6 @@ dev = [
     "ruff>=0.15.10",
 ]
 prod = [
-    "uvicorn>=0.44.0",
 ]
 
 [build-system]

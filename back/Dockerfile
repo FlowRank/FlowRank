@@ -4,12 +4,15 @@ ENV UV_PROJECT_ENVIRONMENT="/usr/local/"
 
 WORKDIR /app
 
-# Au lieu de faire un bind mount, on COPIE les fichiers
-# Comme ça uv peut écrire dessus s'il a besoin de les corriger
 COPY uv.lock pyproject.toml ./
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --no-install-workspace --package back-flowrank --no-group dev
+    uv sync \
+    --no-install-workspace \
+    --package back-flowrank \
+    --no-group dev \
+    --frozen
+
 FROM base AS development
 
 ENV APP_ENV=dev
@@ -32,4 +35,4 @@ ENV PYTHONPATH=/app
 WORKDIR /app
 COPY . /app
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "back.main:app", "--host", "0.0.0.0", "--port", "5000"]
