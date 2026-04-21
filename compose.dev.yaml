@@ -24,7 +24,7 @@ services:
       - .env
     restart: unless-stopped
     volumes:
-      - ./back:/back
+      - ./back:/app/back
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]

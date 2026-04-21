@@ -1,18 +1,18 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import Accueil from "./components/Accueil/Accueil";
 import AuthCallback from "./components/AuthCallback/AuthCallback";
-import CreationCompte from "./components/CompteCreation/CreationCompte";
-import LierCompte from "./components/LierCompte/LierCompte";
+import CreateAccount from "./components/CreateAccount/CreateAccount";
+import LinkAccount from "./components/LinkAccount/LinkAccount";
+import Login from "./components/Login/Login";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/connexion" replace />} />
-      <Route path="/connexion" element={<Accueil />} />
-      <Route path="/creationCompte" element={<CreationCompte />} />
-      <Route path="/lierCompte" element={<LierCompte />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/create-account" element={<CreateAccount />} />
+      <Route path="/link-account" element={<LinkAccount />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="*" element={<Navigate to="/connexion" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
