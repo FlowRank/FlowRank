@@ -9,5 +9,6 @@ class Compte(BaseData):
     id = Column(Integer, primary_key=True)
     email = Column(Text, unique=True)
     hash_mdp = Column(String(255))
+    google_refresh_token = Column(Text, nullable=True)
 
 

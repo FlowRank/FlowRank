@@ -1,15 +1,49 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import HeaderAccueil from "../Header/HeaderAccueil";
 
 const Login: React.FC = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Login submit", { email, password });
-    // Ajoute ici la logique d'authentification
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/account/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = (await response.json()) as {
+        message?: string;
+        detail?: string;
+        access_token?: string;
+      };
+
+      if (!response.ok) {
+        setErrorMessage(data.message ?? data.detail ?? "Invalid credentials.");
+        return;
+      }
+
+      if (data.access_token) {
+        localStorage.setItem("access_token", data.access_token);
+      }
+      navigate("/link-account");
+    } catch {
+      setErrorMessage("The server is unavailable. Please try again shortly.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -20,6 +54,11 @@ const Login: React.FC = () => {
           <h2 className="text-center text-3xl font-semibold text-slate-900 mb-8">
             Login
           </h2>
+          {errorMessage && (
+            <p className="mb-4 rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">
+              {errorMessage}
+            </p>
+          )}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-700">
@@ -49,9 +88,10 @@ const Login: React.FC = () => {
             </div>
             <button
               type="submit"
+              disabled={isSubmitting}
               className="w-full rounded-2xl bg-emerald-600 px-5 py-3 text-base font-semibold text-white transition hover:bg-emerald-700"
             >
-              Sign in
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-500">

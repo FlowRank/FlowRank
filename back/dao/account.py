@@ -23,6 +23,16 @@ class CompteDao:
 
         return db_account
 
+    def update_google_refresh_token(self, account_id: int, refresh_token: str):
+        account = self.get_by_id(account_id)
+        if account is None:
+            return None
+
+        account.google_refresh_token = refresh_token
+        self.db.commit()
+        self.db.refresh(account)
+        return account
+
     def delete(self, email: str):
         account = self.get_account(email)
         self.db.delete(account)
