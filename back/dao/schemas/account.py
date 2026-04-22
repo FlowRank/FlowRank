@@ -19,3 +19,12 @@ class UserData(BaseModel):
     pseudo: str
     email: str
     id: int
+
+
+class GoogleAuthUrlResponseSchema(BaseModel):
+    authorization_url: str
+
+
+class GoogleCodeExchangeSchema(BaseModel):
+    code: str
+    state: str

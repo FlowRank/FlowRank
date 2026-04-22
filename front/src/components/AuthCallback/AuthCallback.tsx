@@ -1,52 +1,94 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Confirm from "../Confirm/confirm";
 import HeaderAccueil from "../Header/HeaderAccueil";
 
 const AuthCallback: React.FC = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const error = searchParams.get("error");
-  const status = searchParams.get("status");
   const code = searchParams.get("code");
+  const state = searchParams.get("state");
+  const [status, setStatus] = useState<"pending" | "success" | "failed">("pending");
+  const [detail, setDetail] = useState("");
 
-  const isFailed = Boolean(error) || status === "failed";
-  const isSuccess = status === "success";
+  useEffect(() => {
+    if (error) {
+      setStatus("failed");
+      setDetail(`Account linking failed: ${error}.`);
+      return;
+    }
+
+    if (!code || !state) {
+      setStatus("failed");
+      setDetail("Google callback is incomplete (missing code or state).");
+      return;
+    }
+
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      setStatus("failed");
+      setDetail("Session expired. Sign in again, then restart account linking.");
+      return;
+    }
+
+    const controller = new AbortController();
+    const exchangeCode = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/account/google/exchange`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ code, state }),
+          signal: controller.signal,
+        });
+
+        const data = (await response.json()) as { message?: string; detail?: string };
+        if (!response.ok) {
+          setStatus("failed");
+          setDetail(data.detail ?? "Unable to complete Google account linking.");
+          return;
+        }
+
+        setStatus("success");
+        setDetail(data.message ?? "Google account linked successfully.");
+      } catch {
+        if (!controller.signal.aborted) {
+          setStatus("failed");
+          setDetail("The server is unavailable. Please try again shortly.");
+        }
+      }
+    };
+
+    void exchangeCode();
+    return () => controller.abort();
+  }, [API_BASE_URL, code, error, state]);
+
   const isPending = status === "pending";
+  const isFailed = status === "failed";
+  const isSuccess = status === "success";
+  const title = useMemo(() => {
+    if (isSuccess) {
+      return "Account linked successfully";
+    }
+    if (isFailed) {
+      return "Account linking failed";
+    }
+    return "Linking account";
+  }, [isFailed, isSuccess]);
 
-  let title = "Liaison du compte";
-  let message = "Veuillez patienter pendant que nous vérifions votre compte Google.";
-  let buttonText = "Recommencer";
-  let buttonAction = () => navigate("/lierCompte");
-  let buttonColor: "green" | "brown" = "green";
-  let showFailedExit = false;
-  let showPendingExit = false;
-
-  if (isSuccess) {
-    title = "Compte lié avec succès";
-    message = "Ta liaison avec Google a été acceptée. Tu peux retourner à la page de connexion.";
-    buttonText = "Retour à la connexion";
-    buttonAction = () => navigate("/connexion");
-  } else if (isFailed) {
-    title = "Échec de la liaison";
-    message = error
-      ? `La liaison a échoué : ${error}. Essaie à nouveau plus tard.`
-      : "La liaison n'a pas pu être finalisée. Retourne sur la page de liaison pour réessayer.";
-    buttonText = "Réessayer";
-    buttonColor = "brown";
-    showFailedExit = true;
-  } else if (code) {
-    title = "Autorisation reçue";
-    message = "Nous avons reçu le code d'autorisation Google. Le traitement est en cours.";
-    buttonText = "Voir l'état";
-    buttonAction = () => navigate("/auth/callback?status=success");
-  } else if (isPending) {
-    title = "Liaison en attente";
-    message = "Nous attendons la confirmation de Google. Merci de patienter.";
-    buttonText = "Actualiser l'état";
-    buttonAction = () => window.location.reload();
-    showPendingExit = true;
-  }
+  const message = useMemo(() => {
+    if (isPending) {
+      return "Finalizing account linking with Google...";
+    }
+    if (detail) {
+      return detail;
+    }
+    return "Please wait while we verify your request.";
+  }, [detail, isPending]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-900">
@@ -65,27 +107,29 @@ const AuthCallback: React.FC = () => {
             </div>
           )}
           <div className="space-y-4">
-            <Confirm
-              title={buttonText}
-              couleur={buttonColor}
-              onClick={buttonAction}
-              classNameAddon="w-full"
-            />
-            {(showFailedExit || showPendingExit) && (
+            {isSuccess && (
+              <Confirm
+                title="Continue"
+                couleur="green"
+                onClick={() => navigate("/")}
+                classNameAddon="w-full"
+              />
+            )}
+            {(isFailed || isPending) && (
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
                   className="rounded-2xl border border-slate-900 bg-slate-900 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-800"
-                  onClick={() => navigate("/lierCompte")}
+                  onClick={() => navigate("/link-account")}
                 >
-                  Revenir à la liaison
+                  Back to linking
                 </button>
                 <button
                   type="button"
                   className="rounded-2xl border border-slate-900 bg-slate-900 px-5 py-3 text-base font-semibold text-white transition hover:bg-slate-800"
                   onClick={() => navigate("/")}
                 >
-                  Accueil
+                  Home
                 </button>
               </div>
             )}

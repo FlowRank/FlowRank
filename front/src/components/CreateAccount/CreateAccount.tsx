@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import HeaderAccueil from "../Header/HeaderAccueil";
 
 const CreateAccount: React.FC = () => {
-  const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +18,7 @@ const CreateAccount: React.FC = () => {
     setSuccessMessage("");
 
     if (password !== confirmPassword) {
-      setErrorMessage("Les mots de passe ne correspondent pas.");
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
@@ -35,14 +35,38 @@ const CreateAccount: React.FC = () => {
       const data = (await response.json()) as { message?: string; detail?: string };
 
       if (!response.ok) {
-        setErrorMessage(data.message ?? data.detail ?? "Impossible de creer le compte.");
+        setErrorMessage(data.message ?? data.detail ?? "Unable to create the account.");
         return;
       }
 
-      setSuccessMessage(data.message ?? "Compte cree avec succes.");
+      const loginResponse = await fetch(`${API_BASE_URL}/account/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const loginData = (await loginResponse.json()) as {
+        access_token?: string;
+        message?: string;
+        detail?: string;
+      };
+
+      if (!loginResponse.ok || !loginData.access_token) {
+        setErrorMessage(
+          loginData.message ??
+            loginData.detail ??
+            "Account created, but automatic sign-in failed.",
+        );
+        return;
+      }
+
+      localStorage.setItem("access_token", loginData.access_token);
+      setSuccessMessage(data.message ?? "Account created successfully.");
       navigate("/link-account");
     } catch {
-      setErrorMessage("Le serveur est indisponible. Reessaie dans un instant.");
+      setErrorMessage("The server is unavailable. Please try again shortly.");
     } finally {
       setIsSubmitting(false);
     }
@@ -111,7 +135,7 @@ const CreateAccount: React.FC = () => {
                 disabled={isSubmitting}
                 className="w-full rounded-2xl bg-amber-700 px-5 py-3 text-base font-semibold text-white transition hover:bg-amber-800"
               >
-                {isSubmitting ? "Creation..." : "Create account"}
+                {isSubmitting ? "Creating..." : "Create account"}
               </button>
             </form>
           </div>

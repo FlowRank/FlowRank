@@ -10,7 +10,7 @@ const HeaderAccueil: React.FC<HeaderAccueilProps> = ({ hideConnexionButton = fal
   const navigate = useNavigate();
 
   function toConnexion() {
-    navigate("/connexion");
+    navigate("/login");
   }
 
   return (
@@ -24,7 +24,7 @@ const HeaderAccueil: React.FC<HeaderAccueilProps> = ({ hideConnexionButton = fal
       {!hideConnexionButton && (
         <div className="flex">
           <Confirm
-            title="Se connecter"
+            title="Sign in"
             couleur="green"
             onClick={toConnexion}
             classNameAddon="w-48"

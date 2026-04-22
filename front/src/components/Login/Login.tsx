@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import HeaderAccueil from "../Header/HeaderAccueil";
 
 const Login: React.FC = () => {
-  const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +31,7 @@ const Login: React.FC = () => {
       };
 
       if (!response.ok) {
-        setErrorMessage(data.message ?? data.detail ?? "Identifiants invalides.");
+        setErrorMessage(data.message ?? data.detail ?? "Invalid credentials.");
         return;
       }
 
@@ -40,7 +40,7 @@ const Login: React.FC = () => {
       }
       navigate("/link-account");
     } catch {
-      setErrorMessage("Le serveur est indisponible. Reessaie dans un instant.");
+      setErrorMessage("The server is unavailable. Please try again shortly.");
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +91,7 @@ const Login: React.FC = () => {
               disabled={isSubmitting}
               className="w-full rounded-2xl bg-emerald-600 px-5 py-3 text-base font-semibold text-white transition hover:bg-emerald-700"
             >
-              {isSubmitting ? "Connexion..." : "Sign in"}
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-500">

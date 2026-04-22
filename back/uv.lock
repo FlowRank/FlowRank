@@ -40,6 +40,7 @@ source = { editable = "." }
 dependencies = [
     { name = "bcrypt" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "httpx" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pyjwt" },
     { name = "sqlalchemy" },
@@ -56,6 +57,7 @@ dev = [
 requires-dist = [
     { name = "bcrypt", specifier = ">=4.2.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.129.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "psycopg", extras = ["binary"] },
     { name = "pyjwt", specifier = ">=2.9.0" },
     { name = "sqlalchemy", specifier = ">=2.0.35" },
