@@ -8,12 +8,15 @@ from back.dao.connection import (
     engine_data,
 )
 from back.router.account import router as account_router
+from back.utils import init_database
 
 BaseData.metadata.create_all(bind=engine_data)
 with engine_data.begin() as conn:
     conn.execute(
         text("ALTER TABLE IF EXISTS compte ADD COLUMN IF NOT EXISTS google_refresh_token TEXT")
     )
+
+init_database()
 
 app = FastAPI(title="API FlowRank", version="0.1", redoc_url=None)
 
