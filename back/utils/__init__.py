@@ -7,7 +7,7 @@ from sqlalchemy import text
 from starlette import status
 
 from back.config import ALGORITHM, SECRET_KEY, oauth2_scheme
-from back.dao.connection import engine_account, engine_data, session
+from back.dao.connection import  engine_data, session
 
 
 def run_command(file, engine):
@@ -39,12 +39,9 @@ def run_command(file, engine):
 
 
 def init_database():
-    with engine_account.connect() as con:
-        with open("sql/compte.sql") as file:
-            run_command(file, con)
 
     with engine_data.connect() as con:
-        with open("sql/dataset.sql") as file:
+        with open("/app/back/sql/account.sql") as file:
             run_command(file, con)
 
 
