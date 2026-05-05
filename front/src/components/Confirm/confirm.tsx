@@ -12,7 +12,7 @@ const Confirm: React.FC<ConfirmProps> = ({ title, couleur = "green", onClick, cl
     couleur === "green"
       ? "bg-emerald-500"
       : couleur === "brown"
-      ? "bg-amber-800"
+      ? "bg-emerald-900"
       : typeof couleur === "string"
       ? couleur
       : "bg-sky-600";

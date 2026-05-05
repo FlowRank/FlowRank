@@ -8,6 +8,12 @@ const LierCompte: React.FC = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const shouldSignInAgain = errorMessage === "Invalid token";
+
+  const handleSignInAgain = () => {
+    localStorage.removeItem("access_token");
+    navigate("/login");
+  };
 
   const handleLinkAccount = async () => {
     const accessToken = localStorage.getItem("access_token");
@@ -31,6 +37,10 @@ const LierCompte: React.FC = () => {
       };
 
       if (!response.ok || !data.authorization_url) {
+        if (data.detail === "Invalid token") {
+          setErrorMessage("Invalid token");
+          return;
+        }
         setErrorMessage(
           data.detail ?? "Unable to start Google account linking. Please try again shortly.",
         );
@@ -62,13 +72,21 @@ const LierCompte: React.FC = () => {
             To finish signing up, link your Google account.
             Click the button below to continue.
           </p>
-          <div className="space-y-4">
+          <div className={shouldSignInAgain ? "grid gap-3 sm:grid-cols-2" : "space-y-4"}>
             <Confirm
               title={isSubmitting ? "Redirecting..." : "Link my account"}
               couleur="green"
               onClick={handleLinkAccount}
               classNameAddon="w-full"
             />
+            {shouldSignInAgain && (
+              <Confirm
+                title="Sign in again"
+                couleur="green"
+                onClick={handleSignInAgain}
+                classNameAddon="w-full"
+              />
+            )}
           </div>
         </div>
       </main>

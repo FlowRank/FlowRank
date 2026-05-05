@@ -7,6 +7,7 @@ from back.dao.connection import (
     BaseData,
     engine_data,
 )
+from back.dao.models import Compte, Link, Mail
 from back.router.account import router as account_router
 from back.utils import init_database
 
