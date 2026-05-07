@@ -92,6 +92,16 @@ jobs:
             git reset --hard origin/main
 
             docker compose -f compose.prod.yaml pull
-            docker compose -f compose.prod.yaml up -d
+            docker compose -f compose.prod.yaml up -d --wait --wait-timeout 120 || {
+              echo "=== docker compose ps ==="
+              docker compose -f compose.prod.yaml ps
+              echo "=== backend logs (tail 150) ==="
+              docker compose -f compose.prod.yaml logs --no-color --tail 150 backend
+              echo "=== frontend logs (tail 150) ==="
+              docker compose -f compose.prod.yaml logs --no-color --tail 150 frontend
+              echo "=== postgres logs (tail 150) ==="
+              docker compose -f compose.prod.yaml logs --no-color --tail 150 postgres
+              exit 1
+            }
             docker image prune -f
           "'
