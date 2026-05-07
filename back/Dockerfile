@@ -17,8 +17,9 @@ FROM base AS development
 
 ENV APP_ENV=dev
 
-CMD ["uvicorn", "back.main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]
-### Stage 3: Production stage ####
+# Seed dev data and run the app in development mode
+CMD ["sh", "-lc", "uv run --no-sync python -m back.scripts.seed_dev; uvicorn back.main:app --host 0.0.0.0 --port 5000 --reload"]
+
 FROM base AS production-deps
 
 # Install Python prod dependencies (with cache)
