@@ -33,6 +33,6 @@ ENV APP_ENV=prod
 COPY --from=production-deps /usr/local/ /usr/local/
 ENV PYTHONPATH=/app
 WORKDIR /app
-COPY . /app
+COPY . /app/back
 
 CMD ["uvicorn", "back.main:app", "--host", "0.0.0.0", "--port", "5000"]
