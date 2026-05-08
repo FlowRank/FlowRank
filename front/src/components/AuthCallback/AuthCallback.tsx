@@ -119,14 +119,14 @@ const AuthCallback: React.FC = () => {
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
-                  className="rounded-2xl border border-slate-900 bg-slate-900 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="rounded-2xl border border-transparent bg-emerald-700 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-emerald-600"
                   onClick={() => navigate("/link-account")}
                 >
                   Back to linking
                 </button>
                 <button
                   type="button"
-                  className="rounded-2xl border border-slate-900 bg-slate-900 px-5 py-3 text-base font-semibold text-white transition hover:bg-slate-800"
+                  className="rounded-2xl border border-transparent bg-emerald-700 px-5 py-3 text-base font-semibold text-white transition hover:bg-emerald-600"
                   onClick={() => navigate("/")}
                 >
                   Home

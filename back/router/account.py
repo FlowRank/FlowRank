@@ -11,6 +11,7 @@ from starlette.responses import JSONResponse
 
 from back import config
 from back.dao.account import CompteDao
+from back.dao.models import Link
 from back.dao.schemas.account import (
     GoogleAuthUrlResponseSchema,
     GoogleCodeExchangeSchema,
@@ -183,8 +184,34 @@ async def google_exchange_code(
             detail="Missing refresh token from Google",
         )
 
-    updated = CompteDao(db).update_google_refresh_token(current_account.id, refresh_token)
-    if updated is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+    gmail_link = (
+        db.query(Link)
+        .filter(
+            Link.compte_id == current_account.id,
+            Link.provider == "gmail",
+        )
+        .first()
+    )
+    if gmail_link is None:
+        gmail_link = Link(
+            compte_id=current_account.id,
+            provider="gmail",
+            account_email=current_account.email,
+            oauth_refresh_token=refresh_token,
+            access_token=token_data.get("access_token"),
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
+        db.add(gmail_link)
+    else:
+        gmail_link.oauth_refresh_token = refresh_token
+        if gmail_link.account_email is None:
+            gmail_link.account_email = current_account.email
+        access_token = token_data.get("access_token")
+        if isinstance(access_token, str):
+            gmail_link.access_token = access_token
+        gmail_link.updated_at = datetime.now(timezone.utc)
+
+    db.commit()
 
     return {"message": "Google account linked"}

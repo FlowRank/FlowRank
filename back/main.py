@@ -3,10 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from back import config
-from back.dao.connection import (
-    BaseData,
-    engine_data,
-)
+from back.dao.connection import BaseData, engine_data
 from back.router.account import router as account_router
 from back.utils import init_database
 
