@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
 
 from back import config
 from back.dao.connection import BaseData, engine_data
@@ -8,10 +7,6 @@ from back.router.account import router as account_router
 from back.utils import init_database
 
 BaseData.metadata.create_all(bind=engine_data)
-with engine_data.begin() as conn:
-    conn.execute(
-        text("ALTER TABLE IF EXISTS compte ADD COLUMN IF NOT EXISTS google_refresh_token TEXT")
-    )
 
 init_database()
 
@@ -29,7 +24,7 @@ app.add_middleware(
 
 @app.get("/healthcheck")
 def healthcheck():
-    return {"message":"API UP"}
+    return {"message": "API UP"}
 
 
 app.include_router(account_router)
