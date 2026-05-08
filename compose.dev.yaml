@@ -26,15 +26,7 @@ services:
     volumes:
       - ./back:/app/back
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--spider",
-          "-q",
-          "--timeout=5",
-          "http://backend:5000/healthcheck",
-        ]
+      test: [ "CMD", "wget", "--spider", "-q", "http://backend:5000/healthcheck" ]
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,7 +38,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       start_period: 10s
       interval: 5s
       timeout: 5s
