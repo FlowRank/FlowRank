@@ -4,11 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from back import config
 from back.dao.connection import BaseData, engine_data
 from back.router.account import router as account_router
-from back.utils import init_database
 
 BaseData.metadata.create_all(bind=engine_data)
-
-init_database()
 
 app = FastAPI(title="API FlowRank", version="0.1", redoc_url=None)
 
