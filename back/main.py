@@ -28,5 +28,5 @@ def healthcheck():
 app.include_router(account_router)
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(get_mails, "interval", minutes=2)
+scheduler.add_job(get_mails, "interval", minutes=int(config.MAIL_FETCH_INTERVAL_MINUTES))
 scheduler.start()

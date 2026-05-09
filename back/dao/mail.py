@@ -30,10 +30,10 @@ class MailDao:
             .first()
         )
 
-    def create(self, mail: MailSchema, provider_message_id: str):
+    def create(self, mail: MailSchema):
         db_mail = Mail(
             link_id=mail.link_id,
-            provider_message_id=provider_message_id,
+            provider_message_id=mail.provider_message_id,
             sender_email=mail.sender_email,
             subject=mail.subject,
             body=mail.body,
