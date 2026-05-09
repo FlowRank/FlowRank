@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 
 import httpx
 import jwt
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import JSONResponse
@@ -13,30 +13,10 @@ from back import config
 from back.dao.account import CompteDao
 from back.dao.mail import MailDao
 from back.dao.link import LinkDao
-from back.dao.schemas.account import (
-    GoogleAuthUrlResponseSchema,
-    GoogleCodeExchangeSchema,
-    LoginResponseSchema,
-    LoginSchema,
-)
-from back.dao.schemas.register import RegisterSchema
+
 from back.utils import get_db
-from back.utils.error import (
-    AccountNotFound,
-    EmailAlreadyExist,
-    EmailFormatError,
-    IncorrectPassword,
-)
-from back.utils.error.schema import ErrorSchema
-from back.utils.routers.account import (
-    check_password,
-    create_access_token,
-    create_account,
-    validate_data,
-)
 
-
-router = APIRouter(prefix="/mails", tags=["mails"])
+router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 def get_current_account(
@@ -60,9 +40,17 @@ def get_current_account(
 
 
 @router.get("/")
-def get_mails(current_account: CompteDao = Depends(get_current_account)):
-    links = LinkDao(get_db()).get_by_account_id(current_account.id)
-    mails = []
-    for link in links:
-        mails.extend(MailDao(get_db()).get_by_link_id(link.id))
+def get_mails(
+    link_id: int = Query(...),
+    db: Session = Depends(get_db),
+    current_account=Depends(get_current_account),
+):
+    # optionnel : vérifier que le link appartient bien au compte
+    link = LinkDao(db).get_by_id(link_id)
+
+    if not link or link.compte_id != current_account.id:
+        return []
+
+    mails = MailDao(db).get_by_link_id(link_id)
+
     return mails

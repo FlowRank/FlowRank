@@ -5,6 +5,8 @@ from back.scripts.getMails import get_mails
 from back import config
 from back.dao.connection import BaseData, engine_data
 from back.router.account import router as account_router
+from back.router.link import router as link_router
+from back.router.dashboard import router as dashboard_router
 
 BaseData.metadata.create_all(bind=engine_data)
 
@@ -26,6 +28,8 @@ def healthcheck():
 
 
 app.include_router(account_router)
+app.include_router(link_router)
+app.include_router(dashboard_router)
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(get_mails, "interval", minutes=int(config.MAIL_FETCH_INTERVAL_MINUTES))

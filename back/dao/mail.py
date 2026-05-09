@@ -11,7 +11,7 @@ class MailDao:
     def get_by_id(self, id_: int):
         return self.db.query(Mail).filter(Mail.id == id_).first()
 
-    def get_by_link(self, link_id: int, limit: int = 100):
+    def get_by_link_id(self, link_id: int, limit: int = 100):
         return (
             self.db.query(Mail)
             .filter(Mail.link_id == link_id)
