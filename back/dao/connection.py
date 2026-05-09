@@ -20,3 +20,9 @@ engine_data = create_engine(DATA_DATABASE_URL)
 session = sessionmaker()
 
 session.configure(binds={BaseData: engine_data})
+
+SessionLocal = sessionmaker(
+    bind=engine_data,
+    autoflush=False,
+    autocommit=False,
+)

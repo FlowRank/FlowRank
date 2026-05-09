@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from apscheduler.schedulers.background import BackgroundScheduler
+from back.scripts.getMails import get_mails
 from back import config
 from back.dao.connection import BaseData, engine_data
 from back.router.account import router as account_router
@@ -25,3 +26,7 @@ def healthcheck():
 
 
 app.include_router(account_router)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(get_mails, "interval", minutes=2)
+scheduler.start()
