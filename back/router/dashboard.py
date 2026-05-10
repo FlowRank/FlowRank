@@ -1,5 +1,4 @@
 from typing import Annotated
-from urllib.parse import urlencode
 
 import httpx
 import jwt
