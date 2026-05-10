@@ -122,7 +122,7 @@ def decode_gmail_body(data: str, charset: str = "utf-8") -> str:
 
     try:
         return decoded_bytes.decode(charset, errors="ignore")
-    except:
+    except (UnicodeDecodeError, LookupError):
         return decoded_bytes.decode("windows-1252", errors="ignore")
 
 
