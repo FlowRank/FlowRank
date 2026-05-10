@@ -1,6 +1,5 @@
 from datetime import timedelta, timezone
 from typing import Annotated
-from urllib.parse import urlencode
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException
