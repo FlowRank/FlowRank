@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import datetime
 from typing import Dict, Any
+from back import config
 from sqlalchemy.exc import IntegrityError
 from back.dao.account import CompteDao
 from back.dao.link import LinkDao
@@ -14,7 +15,7 @@ from back.dao.connection import SessionLocal
 from back.dao.schemas.mail import MailSchema
 from back.utils.google.format import html_to_text
 
-LOG_DIR = "/var/log/flowrank"
+LOG_DIR = config.LOG_DIR
 LOG_FILE = f"{LOG_DIR}/fetch_mails.log"
 
 os.makedirs(LOG_DIR, exist_ok=True)
