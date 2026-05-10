@@ -4,7 +4,6 @@ import jwt
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from starlette import status
-from starlette.responses import JSONResponse
 
 from back import config
 from back.dao.account import CompteDao
