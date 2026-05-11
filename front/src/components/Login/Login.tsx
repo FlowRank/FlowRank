@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { postAuthRoute } from "../../auth/postLoginRoute";
 import HeaderAccueil from "../Header/HeaderAccueil";
 
 const Login: React.FC = () => {
@@ -9,6 +10,10 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  if (localStorage.getItem("access_token")) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,6 +42,9 @@ const Login: React.FC = () => {
 
       if (data.access_token) {
         localStorage.setItem("access_token", data.access_token);
+        const next = await postAuthRoute(data.access_token);
+        navigate(next);
+        return;
       }
       navigate("/link-account");
     } catch {
