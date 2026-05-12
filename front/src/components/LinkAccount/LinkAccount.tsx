@@ -1,14 +1,52 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { API_BASE } from "../../constants/api";
 import Confirm from "../Confirm/confirm";
 import HeaderAccueil from "../Header/HeaderAccueil";
 
 const LierCompte: React.FC = () => {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkingLinks, setCheckingLinks] = useState(true);
   const shouldSignInAgain = errorMessage === "Invalid token";
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch(`${API_BASE}/links/`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (response.status === 401) {
+          localStorage.removeItem("access_token");
+          if (!cancelled) navigate("/login", { replace: true });
+          return;
+        }
+        if (response.ok) {
+          const data: unknown = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            if (!cancelled) navigate("/dashboard", { replace: true });
+            return;
+          }
+        }
+      } catch {
+        /* keep page if check fails */
+      } finally {
+        if (!cancelled) setCheckingLinks(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   const handleSignInAgain = () => {
     localStorage.removeItem("access_token");
@@ -26,7 +64,7 @@ const LierCompte: React.FC = () => {
     setErrorMessage("");
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/account/google/auth-url`, {
+      const response = await fetch(`${API_BASE}/account/google/auth-url`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -54,6 +92,20 @@ const LierCompte: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (checkingLinks) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-900">
+        <HeaderAccueil hideConnexionButton />
+        <main className="flex min-h-[calc(100vh-96px)] items-center justify-center px-4 py-10">
+          <div className="flex flex-col items-center gap-4 text-slate-300">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
+            <p className="text-sm">Checking your account…</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-900">
@@ -88,6 +140,12 @@ const LierCompte: React.FC = () => {
               />
             )}
           </div>
+          <p className="mt-6 text-center text-sm text-slate-500">
+            Already linked?{" "}
+            <Link to="/dashboard" className="font-semibold text-emerald-700 hover:text-emerald-800">
+              Open dashboard
+            </Link>
+          </p>
         </div>
       </main>
     </div>

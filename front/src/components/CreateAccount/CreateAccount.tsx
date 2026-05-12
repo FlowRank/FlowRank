@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { postAuthRoute } from "../../auth/postLoginRoute";
 import HeaderAccueil from "../Header/HeaderAccueil";
 
 const CreateAccount: React.FC = () => {
@@ -11,6 +12,10 @@ const CreateAccount: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  if (localStorage.getItem("access_token")) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -64,7 +69,8 @@ const CreateAccount: React.FC = () => {
 
       localStorage.setItem("access_token", loginData.access_token);
       setSuccessMessage(data.message ?? "Account created successfully.");
-      navigate("/link-account");
+      const next = await postAuthRoute(loginData.access_token);
+      navigate(next);
     } catch {
       setErrorMessage("The server is unavailable. Please try again shortly.");
     } finally {

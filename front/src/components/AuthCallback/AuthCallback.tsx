@@ -67,6 +67,14 @@ const AuthCallback: React.FC = () => {
     return () => controller.abort();
   }, [API_BASE_URL, code, error, state]);
 
+  useEffect(() => {
+    if (status !== "success") return;
+    const t = window.setTimeout(() => {
+      navigate("/dashboard", { replace: true });
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [navigate, status]);
+
   const isPending = status === "pending";
   const isFailed = status === "failed";
   const isSuccess = status === "success";
@@ -109,9 +117,9 @@ const AuthCallback: React.FC = () => {
           <div className="space-y-4">
             {isSuccess && (
               <Confirm
-                title="Continue"
+                title="Continue to dashboard"
                 couleur="green"
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/dashboard", { replace: true })}
                 classNameAddon="w-full"
               />
             )}
@@ -127,9 +135,9 @@ const AuthCallback: React.FC = () => {
                 <button
                   type="button"
                   className="rounded-2xl border border-transparent bg-emerald-700 px-5 py-3 text-base font-semibold text-white transition hover:bg-emerald-600"
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/login")}
                 >
-                  Home
+                  Sign in
                 </button>
               </div>
             )}
