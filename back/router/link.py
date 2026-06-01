@@ -1,16 +1,13 @@
 from typing import Annotated
 
 import jwt
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from starlette import status
-
 from back import config
 from back.dao.account import CompteDao
 from back.dao.link import LinkDao
 from back.utils import get_db
-
-
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from starlette import status
 
 router = APIRouter(prefix="/links", tags=["links"])
 
@@ -22,11 +19,15 @@ def get_current_account(
     try:
         payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
     except jwt.PyJWTError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        ) from exc
 
     email = payload.get("sub")
     if not isinstance(email, str):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload"
+        )
 
     account = CompteDao(db).get_account(email)
     if account is None:

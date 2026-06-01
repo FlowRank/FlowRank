@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -7,7 +6,7 @@ from pydantic import BaseModel
 class LinkSchema(BaseModel):
     compte_id: int
     provider: str
-    account_email: Optional[str] = None
-    oauth_refresh_token: Optional[str] = None
-    access_token: Optional[str] = None
-    access_token_expires_at: Optional[datetime] = None
+    account_email: str | None = None
+    oauth_refresh_token: str | None = None
+    access_token: str | None = None
+    access_token_expires_at: datetime | None = None

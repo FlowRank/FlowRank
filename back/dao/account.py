@@ -10,7 +10,7 @@ class CompteDao:
 
     def get_account(self, email: str):
         return self.db.query(Compte).filter(Compte.email == email).first()
-    
+
     def get_all_accounts(self):
         return self.db.query(Compte).all()
 
