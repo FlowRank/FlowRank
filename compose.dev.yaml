@@ -24,9 +24,9 @@ services:
       - .env
     restart: unless-stopped
     volumes:
+    volumes:
       - ./back:/app/back
-      - hf_cache:${HF_HOME}
-    healthcheck:
+      - hf_cache:${HF_HOME:-/var/cache/huggingface}
       test: ["CMD", "wget", "--spider", "-q", "http://backend:5000/healthcheck"]
       start_period: 30s
       interval: 30s
