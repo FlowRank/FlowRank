@@ -10,9 +10,14 @@ LOG_FILE = f"{LOG_DIR}/fetch_mails.log"
 
 os.makedirs(LOG_DIR, exist_ok=True)
 
-_file_handler = logging.FileHandler(LOG_FILE)
-_file_handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
-logging.getLogger("back.workflows.mail_fetch").addHandler(_file_handler)
+logger = logging.getLogger("back.workflows.mail_fetch")
+if not any(
+    isinstance(h, logging.FileHandler) and getattr(h, "baseFilename", None) == LOG_FILE
+    for h in logger.handlers
+):
+    _file_handler = logging.FileHandler(LOG_FILE)
+    _file_handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
+    logger.addHandler(_file_handler)
 
 
 def get_mails() -> None:
