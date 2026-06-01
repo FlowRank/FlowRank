@@ -19,9 +19,11 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    volumes:
+      - hf_cache:${HF_HOME}
 
     healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://backend:5000/healthcheck" ]
+      test: ["CMD", "wget", "--spider", "-q", "http://backend:5000/healthcheck"]
       start_period: 30s
       interval: 30s
       timeout: 5s
@@ -37,7 +39,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       start_period: 10s
       interval: 5s
       timeout: 5s
@@ -48,3 +50,4 @@ services:
 
 volumes:
   database:
+  hf_cache:
