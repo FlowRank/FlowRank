@@ -1,14 +1,9 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 from urllib.parse import urlencode
 
 import httpx
 import jwt
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from starlette import status
-from starlette.responses import JSONResponse
-
 from back import config
 from back.dao.account import CompteDao
 from back.dao.models import Link
@@ -20,19 +15,19 @@ from back.dao.schemas.account import (
 )
 from back.dao.schemas.register import RegisterSchema
 from back.utils import get_db
-from back.utils.error import (
-    AccountNotFound,
-    EmailAlreadyExist,
-    EmailFormatError,
-    IncorrectPassword,
-)
+from back.utils.error import AccountNotFound, EmailAlreadyExist, EmailFormatError, IncorrectPassword
 from back.utils.error.schema import ErrorSchema
+from back.utils.google.oauth import resolve_redirect_uri
 from back.utils.routers.account import (
     check_password,
     create_access_token,
     create_account,
     validate_data,
 )
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.orm import Session
+from starlette import status
+from starlette.responses import JSONResponse
 
 router = APIRouter(prefix="/account", tags=["account"])
 
@@ -44,11 +39,15 @@ def get_current_account(
     try:
         payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
     except jwt.PyJWTError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        ) from exc
 
     email = payload.get("sub")
     if not isinstance(email, str):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload"
+        )
 
     account = CompteDao(db).get_account(email)
     if account is None:
@@ -108,16 +107,22 @@ def login(account: LoginSchema, db: Session = Depends(get_db)):
     "/google/auth-url",
     responses={200: {"model": GoogleAuthUrlResponseSchema}},
 )
-def google_auth_url(current_account=Depends(get_current_account)):
-    if not all([config.GOOGLE_CLIENT_ID, config.GOOGLE_REDIRECT_URI]):
+def google_auth_url(
+    request: Request,
+    current_account=Depends(get_current_account),
+):
+    if not config.GOOGLE_CLIENT_ID:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Google OAuth is not configured",
         )
 
+    redirect_uri = resolve_redirect_uri(request)
+
     state_payload = {
         "sub": current_account.email,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
+        "redirect_uri": redirect_uri,
+        "exp": datetime.now(UTC) + timedelta(minutes=10),
     }
     state = jwt.encode(state_payload, config.SECRET_KEY, algorithm=config.ALGORITHM)
 
@@ -125,7 +130,7 @@ def google_auth_url(current_account=Depends(get_current_account)):
         {
             "response_type": "code",
             "client_id": config.GOOGLE_CLIENT_ID,
-            "redirect_uri": config.GOOGLE_REDIRECT_URI,
+            "redirect_uri": redirect_uri,
             "scope": "openid email profile https://www.googleapis.com/auth/gmail.readonly",
             "access_type": "offline",
             "prompt": "consent",
@@ -142,7 +147,7 @@ async def google_exchange_code(
     db: Session = Depends(get_db),
     current_account=Depends(get_current_account),
 ):
-    if not all([config.GOOGLE_CLIENT_ID, config.GOOGLE_CLIENT_SECRET, config.GOOGLE_REDIRECT_URI]):
+    if not config.GOOGLE_CLIENT_ID or not config.GOOGLE_CLIENT_SECRET:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Google OAuth is not configured",
@@ -151,11 +156,22 @@ async def google_exchange_code(
     try:
         state_payload = jwt.decode(payload.state, config.SECRET_KEY, algorithms=[config.ALGORITHM])
     except jwt.PyJWTError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid state") from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid state"
+        ) from exc
 
     state_email = state_payload.get("sub")
     if state_email != current_account.email:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="State does not match account")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="State does not match account"
+        )
+
+    redirect_uri = state_payload.get("redirect_uri")
+    if not isinstance(redirect_uri, str) or not redirect_uri:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid state: missing redirect_uri",
+        )
 
     async with httpx.AsyncClient(timeout=15.0) as client:
         response = await client.post(
@@ -164,7 +180,7 @@ async def google_exchange_code(
                 "code": payload.code,
                 "client_id": config.GOOGLE_CLIENT_ID,
                 "client_secret": config.GOOGLE_CLIENT_SECRET,
-                "redirect_uri": config.GOOGLE_REDIRECT_URI,
+                "redirect_uri": redirect_uri,
                 "grant_type": "authorization_code",
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -199,8 +215,8 @@ async def google_exchange_code(
             account_email=current_account.email,
             oauth_refresh_token=refresh_token,
             access_token=token_data.get("access_token"),
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
         )
         db.add(gmail_link)
     else:
@@ -210,7 +226,7 @@ async def google_exchange_code(
         access_token = token_data.get("access_token")
         if isinstance(access_token, str):
             gmail_link.access_token = access_token
-        gmail_link.updated_at = datetime.now(timezone.utc)
+        gmail_link.updated_at = datetime.now(UTC)
 
     db.commit()
 
