@@ -1,5 +1,6 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
+from back.dao.label import LabelDao
 from back.dao.models import Mail
 from back.dao.schemas.mail import MailSchema
 
@@ -14,8 +15,19 @@ class MailDao:
     def get_by_link_id(self, link_id: int, limit: int = 100):
         return (
             self.db.query(Mail)
+            .options(joinedload(Mail.labels))
             .filter(Mail.link_id == link_id)
             .order_by(Mail.received_at.desc())
+            .limit(limit)
+            .all()
+        )
+
+    def get_unlabeled_by_link_id(self, link_id: int, limit: int):
+        return (
+            self.db.query(Mail)
+            .filter(Mail.link_id == link_id)
+            .filter(~Mail.labels.any())
+            .order_by(Mail.received_at.asc())
             .limit(limit)
             .all()
         )
@@ -35,12 +47,10 @@ class MailDao:
             link_id=mail.link_id,
             provider_message_id=mail.provider_message_id,
             sender_email=mail.sender_email,
+            recipient_email=mail.recipient_email,
             subject=mail.subject,
             body=mail.body,
-            folder_label=mail.folder_label,
             received_at=mail.received_at,
-            priority_score=mail.priority_score,
-            extras=mail.extras,
         )
 
         self.db.add(db_mail)
@@ -48,6 +58,42 @@ class MailDao:
         self.db.refresh(db_mail)
 
         return db_mail
+
+    def create_with_label(
+        self,
+        mail: MailSchema,
+        label_name: str,
+        *,
+        commit: bool = True,
+    ) -> Mail:
+        """Insère un mail et associe un label ground-truth (sans commit si commit=False)."""
+
+        label_dao = LabelDao(self.db)
+        db_mail = Mail(
+            link_id=mail.link_id,
+            provider_message_id=mail.provider_message_id,
+            sender_email=mail.sender_email,
+            recipient_email=mail.recipient_email,
+            subject=mail.subject,
+            body=mail.body,
+            received_at=mail.received_at,
+        )
+        self.db.add(db_mail)
+        self.db.flush()
+
+        label = label_dao.get_or_create(mail.link_id, label_name)
+        label_dao.attach_to_mail(db_mail, label)
+
+        if commit:
+            self.db.commit()
+            self.db.refresh(db_mail)
+        else:
+            self.db.flush()
+
+        return db_mail
+
+    def commit(self) -> None:
+        self.db.commit()
 
     def update(self, mail_id: int, **kwargs):
         mail = self.get_by_id(mail_id)
