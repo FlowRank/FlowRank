@@ -7,15 +7,19 @@ export type ApiLink = {
   account_email?: string | null;
 };
 
+export type DashboardLabel = {
+  name: string;
+  color: string;
+};
+
 /** Shape returned by GET /dashboard?link_id= */
 export type DashboardMail = {
   link_id: number;
   provider_message_id?: string;
   sender_email?: string | null;
   subject?: string | null;
+  body?: string | null;
   received_at?: string | null;
-  priority_score?: number | null;
-  folder_label?: string | null;
-  extras?: { snippet?: string; gmail_id?: string } | null;
   created_at?: string | null;
+  labels?: DashboardLabel[];
 };

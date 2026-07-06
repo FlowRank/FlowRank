@@ -1,18 +1,27 @@
 from sqlalchemy import (
     Column,
     DateTime,
-    Float,
     ForeignKey,
     Index,
     Integer,
     String,
+    Table,
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from back.dao.connection import BaseData
+
+mail_label = Table(
+    "mail_label",
+    BaseData.metadata,
+    Column("mail_id", Integer, ForeignKey("mail.id", ondelete="CASCADE"), primary_key=True),
+    Column("label_id", Integer, ForeignKey("label.id", ondelete="CASCADE"), primary_key=True),
+    Index("ix_mail_label_label_id", "label_id"),
+)
+
 
 class Compte(BaseData):
     """Utilisateur applicatif (login email + mot de passe)."""
@@ -57,10 +66,29 @@ class Mail(BaseData):
     link_id = Column(Integer, ForeignKey("link.id", ondelete="CASCADE"), nullable=False)
     provider_message_id = Column(String(255), nullable=False)
     sender_email = Column(String(255), nullable=True)
+    recipient_email = Column(String(255), nullable=True)
     subject = Column(String(500), nullable=True)
     body = Column(Text, nullable=True)
-    folder_label = Column(String(100), nullable=True)
     received_at = Column(DateTime(timezone=True), nullable=True)
-    priority_score = Column(Float, nullable=True)
-    extras = Column("metadata", JSONB, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
+
+    labels = relationship("Label", secondary=mail_label, back_populates="mails")
+
+
+class Label(BaseData):
+    """Label réutilisable au sein d'une boîte (link), associable à plusieurs mails."""
+
+    __tablename__ = "label"
+    __table_args__ = (
+        UniqueConstraint("link_id", "name", name="uq_label_link_name"),
+        Index("ix_label_link_id", "link_id"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    link_id = Column(Integer, ForeignKey("link.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(100), nullable=False)
+    color = Column(String(7), nullable=False, server_default="#6b7280")
+    created_at = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=True)
+
+    mails = relationship("Mail", secondary=mail_label, back_populates="labels")

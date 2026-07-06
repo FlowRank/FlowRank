@@ -2,39 +2,15 @@ import argparse
 import logging
 import os
 
-from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from back.dao.account import CompteDao
 from back.dao.schemas.account import AccountSchema
+from back.scripts._db import ensure_schema, must_allow_seed
 from back.utils.routers.account import hash_password
 
 logger = logging.getLogger(__name__)
-
-
-def _must_allow_seed(*, force: bool) -> None:
-    if force:
-        return
-    if os.getenv("APP_ENV") != "dev":
-        raise RuntimeError("Application environment is not set to dev")
-
-
-def _ensure_schema() -> None:
-    """
-    Ensure the database schema exists before seeding.
-
-    TODO: Replace this with proper migrations (Alembic) once introduced.
-    """
-
-    # Import local pour éviter les effets de bord au chargement du module
-    from back.dao.connection import BaseData, engine_data
-
-    BaseData.metadata.create_all(bind=engine_data)
-    with engine_data.begin() as conn:
-        conn.execute(
-            text("ALTER TABLE IF EXISTS compte ADD COLUMN IF NOT EXISTS google_refresh_token TEXT")
-        )
 
 
 def seed_dev(db: Session) -> None:
@@ -63,6 +39,8 @@ def seed_dev(db: Session) -> None:
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
+
     parser = argparse.ArgumentParser(description="Seed dev data (FlowRank).")
     parser.add_argument(
         "-f",
@@ -72,11 +50,10 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    _must_allow_seed(force=args.force)
+    must_allow_seed(force=args.force)
 
-    _ensure_schema()
+    ensure_schema()
 
-    # Import local pour éviter les effets de bord au chargement du module
     from back.dao.connection import session
 
     db = session()

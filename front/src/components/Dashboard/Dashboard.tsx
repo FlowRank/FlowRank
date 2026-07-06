@@ -280,8 +280,8 @@ const Dashboard: React.FC = () => {
                       <th className="px-4 py-3 font-medium">Received</th>
                       <th className="px-4 py-3 font-medium">Subject</th>
                       <th className="px-4 py-3 font-medium">From</th>
-                      <th className="px-4 py-3 font-medium">Snippet</th>
-                      <th className="px-4 py-3 font-medium">Priority</th>
+                      <th className="px-4 py-3 font-medium">Preview</th>
+                      <th className="px-4 py-3 font-medium">Labels</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-slate-200">
@@ -299,7 +299,7 @@ const Dashboard: React.FC = () => {
                       </tr>
                     ) : (
                       mails.map((mail, idx) => {
-                        const snippet = mail.extras?.snippet ?? "";
+                        const preview = (mail.body ?? "").trim();
                         const key =
                           mail.provider_message_id ??
                           `${mail.subject ?? "no-subject"}-${idx}`;
@@ -314,11 +314,25 @@ const Dashboard: React.FC = () => {
                             <td className="max-w-[180px] truncate px-4 py-3 text-slate-300">
                               {mail.sender_email ?? "—"}
                             </td>
-                            <td className="max-w-md truncate px-4 py-3 text-slate-400" title={snippet}>
-                              {snippet || "—"}
+                            <td className="max-w-md truncate px-4 py-3 text-slate-400" title={preview}>
+                              {preview || "—"}
                             </td>
-                            <td className="px-4 py-3 text-slate-400">
-                              {mail.priority_score ?? "—"}
+                            <td className="px-4 py-3">
+                              <div className="flex flex-wrap gap-1">
+                                {(mail.labels ?? []).length === 0 ? (
+                                  <span className="text-slate-500">—</span>
+                                ) : (
+                                  (mail.labels ?? []).map((label) => (
+                                    <span
+                                      key={label.name}
+                                      className="rounded-full px-2 py-0.5 text-xs font-medium text-slate-900"
+                                      style={{ backgroundColor: label.color }}
+                                    >
+                                      {label.name}
+                                    </span>
+                                  ))
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );

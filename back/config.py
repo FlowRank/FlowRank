@@ -31,9 +31,24 @@ APP_URL = os.getenv("APP_URL")
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
-MAIL_FETCH_INTERVAL_MINUTES=os.getenv("MAIL_FETCH_INTERVAL_MINUTES")
-LOG_DIR=os.getenv("LOG_DIR")
+MAIL_FETCH_INTERVAL_MINUTES = os.getenv("MAIL_FETCH_INTERVAL_MINUTES", "10")
+LOG_DIR = os.getenv("LOG_DIR")
 if LOG_DIR is None:
     LOG_DIR = "/var/log/flowrank"
+
+MAIL_SORTER_CLASS_PATH = os.getenv("MAIL_SORTER_CLASS_PATH", "")
+
+MAIL_SORT_MODEL_ID = os.getenv("MAIL_SORT_MODEL_ID", "FlowRank/mailSort")
+
+_mail_sort_interval = os.getenv("MAIL_SORT_INTERVAL_MINUTES", "10")
+if _mail_sort_interval.isdigit():
+    MAIL_SORT_INTERVAL_MINUTES = int(_mail_sort_interval)
+else:
+    raise RuntimeError("MAIL_SORT_INTERVAL_MINUTES must be an integer")
+
+_mail_sort_batch = os.getenv("MAIL_SORT_BATCH_SIZE", "50")
+if _mail_sort_batch.isdigit():
+    MAIL_SORT_BATCH_SIZE = int(_mail_sort_batch)
+else:
+    raise RuntimeError("MAIL_SORT_BATCH_SIZE must be an integer")

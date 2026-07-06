@@ -12,11 +12,7 @@ class LinkDao:
         return self.db.query(Link).filter(Link.id == id_).first()
 
     def get_by_account_id(self, compte_id: int):
-        return (
-            self.db.query(Link)
-            .filter(Link.compte_id == compte_id)
-            .all()
-        )
+        return self.db.query(Link).filter(Link.compte_id == compte_id).all()
 
     def get_by_account_and_provider(self, compte_id: int, provider: str):
         return (
