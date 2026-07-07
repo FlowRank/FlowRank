@@ -5,7 +5,7 @@ from back import config
 from back.dao.account import CompteDao
 from back.dao.link import LinkDao
 from back.dao.mail import MailDao
-from back.dao.schemas.dashboard import MailOut
+from back.dao.schemas.dashboard import DashboardStatsOut, MailboxCountOut, MailOut
 from back.utils import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -51,3 +51,20 @@ def get_mails(
 
     mails = MailDao(db).get_by_link_id(link_id)
     return [MailOut.model_validate(mail) for mail in mails]
+
+
+@router.get("/stats", response_model=DashboardStatsOut)
+def get_dashboard_stats(
+    db: Session = Depends(get_db),
+    current_account=Depends(get_current_account),
+):
+    mail_dao = MailDao(db)
+    by_link = [
+        MailboxCountOut(link_id=link_id, count=count)
+        for link_id, count in mail_dao.count_by_account_grouped_by_link(current_account.id)
+    ]
+
+    return DashboardStatsOut(
+        total_count=mail_dao.count_by_account_id(current_account.id),
+        by_link=by_link,
+    )

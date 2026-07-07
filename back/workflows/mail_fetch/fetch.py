@@ -59,15 +59,32 @@ def fetch_all_gmail_mails(db: Session) -> None:
     logger.info("[mail_fetch] accounts_found=%s", len(accounts))
 
     for account in accounts:
-        link = LinkDao(db).get_by_account_and_provider(account.id, "gmail")
+        links = LinkDao(db).get_all_by_account_and_provider(account.id, "gmail")
+        active_links = [link for link in links if link.oauth_refresh_token]
 
-        if not link or not link.oauth_refresh_token:
+        if not active_links:
             logger.warning("[mail_fetch] no_gmail_link account=%s", account.email)
             continue
 
-        try:
-            logger.info("[mail_fetch] processing account=%s", account.email)
-            count = fetch_gmail_mails_for_link(db, link.id, link.oauth_refresh_token)
-            logger.info("[mail_fetch] total_mails_found=%s account=%s", count, account.email)
-        except Exception as exc:
-            logger.error("[mail_fetch] account=%s error=%s", account.email, exc)
+        for link in active_links:
+            try:
+                logger.info(
+                    "[mail_fetch] processing account=%s link_id=%s mailbox=%s",
+                    account.email,
+                    link.id,
+                    link.account_email,
+                )
+                count = fetch_gmail_mails_for_link(db, link.id, link.oauth_refresh_token)
+                logger.info(
+                    "[mail_fetch] total_mails_found=%s account=%s link_id=%s",
+                    count,
+                    account.email,
+                    link.id,
+                )
+            except Exception as exc:
+                logger.error(
+                    "[mail_fetch] account=%s link_id=%s error=%s",
+                    account.email,
+                    link.id,
+                    exc,
+                )

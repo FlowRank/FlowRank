@@ -1,7 +1,8 @@
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from back.dao.label import LabelDao
-from back.dao.models import Mail
+from back.dao.models import Link, Mail
 from back.dao.schemas.mail import MailSchema
 
 
@@ -19,6 +20,26 @@ class MailDao:
             .filter(Mail.link_id == link_id)
             .order_by(Mail.received_at.desc())
             .limit(limit)
+            .all()
+        )
+
+    def count_by_link_id(self, link_id: int) -> int:
+        return self.db.query(Mail).filter(Mail.link_id == link_id).count()
+
+    def count_by_account_id(self, account_id: int) -> int:
+        return (
+            self.db.query(Mail)
+            .join(Link, Link.id == Mail.link_id)
+            .filter(Link.compte_id == account_id)
+            .count()
+        )
+
+    def count_by_account_grouped_by_link(self, account_id: int) -> list[tuple[int, int]]:
+        return (
+            self.db.query(Mail.link_id, func.count(Mail.id))
+            .join(Link, Link.id == Mail.link_id)
+            .filter(Link.compte_id == account_id)
+            .group_by(Mail.link_id)
             .all()
         )
 

@@ -24,6 +24,32 @@ class LinkDao:
             .first()
         )
 
+    def get_all_by_account_and_provider(self, compte_id: int, provider: str):
+        return (
+            self.db.query(Link)
+            .filter(
+                Link.compte_id == compte_id,
+                Link.provider == provider,
+            )
+            .all()
+        )
+
+    def get_by_account_provider_and_email(
+        self,
+        compte_id: int,
+        provider: str,
+        account_email: str,
+    ):
+        return (
+            self.db.query(Link)
+            .filter(
+                Link.compte_id == compte_id,
+                Link.provider == provider,
+                Link.account_email == account_email,
+            )
+            .first()
+        )
+
     def create(self, link: LinkSchema):
         db_link = Link(
             compte_id=link.compte_id,

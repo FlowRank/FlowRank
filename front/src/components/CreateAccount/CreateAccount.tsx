@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { postAuthRoute } from "../../auth/postLoginRoute";
 import HeaderAccueil from "../Header/HeaderAccueil";
+import PasswordField from "../PasswordField/PasswordField";
 
 const CreateAccount: React.FC = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
@@ -110,32 +111,18 @@ const CreateAccount: React.FC = () => {
                   placeholder="example@mail.com"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700">
-                  Confirm password
-                </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-                  placeholder="••••••••"
-                />
-              </div>
+              <PasswordField
+                label="Password"
+                value={password}
+                onChange={setPassword}
+                autoComplete="new-password"
+              />
+              <PasswordField
+                label="Confirm password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                autoComplete="new-password"
+              />
               <button
                 type="submit"
                 disabled={isSubmitting}
