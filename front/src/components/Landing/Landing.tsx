@@ -21,30 +21,30 @@ const features = [
 
 const inboxRows = [
   {
-    from: 'PRO BTP',
-    subject: "Nos plus belles idées d'évasion !",
+    from: 'Axa Banque',
+    subject: 'Votre relevé mensuel est disponible',
     label: 'finance',
     tone: 'bg-emerald-300 text-slate-950',
     time: '15:25',
   },
   {
     from: 'GitHub',
-    subject: 'PR run failed: Build/Deploy production',
+    subject: 'PR checks failed: build / deploy',
     label: 'software engineering',
     tone: 'bg-sky-300 text-slate-950',
     time: '13:51',
   },
   {
-    from: 'Toulouse INP',
-    subject: 'Re: Projet I2 CNAM',
-    label: 'work/airbus',
+    from: 'INP Toulouse',
+    subject: 'Re: Projet de groupe — prochaine étape',
+    label: 'work/school',
     tone: 'bg-amber-300 text-slate-950',
     time: '08:40',
   },
   {
     from: 'Google',
-    subject: 'Alerte de sécurité',
-    label: 'finance',
+    subject: 'Alerte de sécurité : nouvelle connexion',
+    label: 'security',
     tone: 'bg-rose-300 text-slate-950',
     time: 'Jun 4',
   },
@@ -89,12 +89,12 @@ const Landing = () => {
               <div className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-950 shadow-2xl shadow-black/40">
                 <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
                   <div className="flex items-center gap-2">
-                    <span className="h-7 w-7 rounded-md bg-gradient-to-br from-red-400 via-yellow-300 to-emerald-400" />
+                    <span className="h-7 w-7 rounded-md bg-linear-to-br from-red-400 via-yellow-300 to-emerald-400" />
                     <span className="text-lg font-bold text-white">FlowRank</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="hidden max-w-[160px] truncate rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:inline">
-                      dev@flowrank.local
+                      alex.martin@gmail.com
                     </span>
                     <span className="h-9 w-9 rounded-full border border-white/10 bg-white/5" />
                   </div>
@@ -108,8 +108,8 @@ const Landing = () => {
                     <div className="space-y-1">
                       {[
                         { label: 'All inboxes', count: '68', active: true },
-                        { label: 'enzofournet31@gmail.com', count: '51', active: false },
-                        { label: 'app.flowrank@gmail.com', count: '17', active: false },
+                        { label: 'alex.martin@gmail.com', count: '51', active: false },
+                        { label: 'camille.dupont@outlook.com', count: '17', active: false },
                       ].map((mailbox) => (
                         <div
                           key={mailbox.label}
@@ -139,7 +139,7 @@ const Landing = () => {
                       {inboxRows.map((row, index) => (
                         <div
                           key={row.subject}
-                          className={`px-4 py-3 ${index === 0 ? 'bg-white/[0.08]' : ''}`}
+                          className={`px-4 py-3 ${index === 0 ? 'bg-white/8' : ''}`}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
@@ -162,16 +162,16 @@ const Landing = () => {
 
                   <article className="hidden bg-slate-950/60 p-5 lg:block">
                     <div className="rounded-lg border border-white/10 bg-slate-950 p-5">
-                      <p className="text-xs text-slate-500">7 juil. 2026, 15:25</p>
+                      <p className="text-xs text-slate-500">July 7, 2026, 15:25</p>
                       <h3 className="mt-2 text-xl font-bold leading-7 text-white">
-                        Nos plus belles idées d'évasion !
+                        Votre relevé mensuel est disponible
                       </h3>
                       <div className="mt-4 grid gap-2 text-sm text-slate-300">
                         <p>
-                          <span className="text-slate-500">From</span> PRO BTP
+                          <span className="text-slate-500">From</span> Axa Banque
                         </p>
                         <p>
-                          <span className="text-slate-500">Mailbox</span> enzofournet31@gmail.com
+                          <span className="text-slate-500">Mailbox</span> alex.martin@gmail.com
                         </p>
                       </div>
                       <p className="mt-5 text-sm leading-7 text-slate-300">
