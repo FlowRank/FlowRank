@@ -32,6 +32,20 @@ from starlette.responses import JSONResponse
 router = APIRouter(prefix="/account", tags=["account"])
 
 
+def _decode_google_email(token_data: dict) -> str | None:
+    id_token = token_data.get("id_token")
+    if not isinstance(id_token, str):
+        return None
+
+    try:
+        payload = jwt.decode(id_token, options={"verify_signature": False})
+    except jwt.PyJWTError:
+        return None
+
+    email = payload.get("email")
+    return email if isinstance(email, str) and email else None
+
+
 def get_current_account(
     token: Annotated[str, Depends(config.oauth2_scheme)],
     db: Session = Depends(get_db),
@@ -133,7 +147,7 @@ def google_auth_url(
             "redirect_uri": redirect_uri,
             "scope": "openid email profile https://www.googleapis.com/auth/gmail.readonly",
             "access_type": "offline",
-            "prompt": "consent",
+            "prompt": "consent select_account",
             "state": state,
         }
     )
@@ -200,11 +214,13 @@ async def google_exchange_code(
             detail="Missing refresh token from Google",
         )
 
+    gmail_email = _decode_google_email(token_data) or current_account.email
     gmail_link = (
         db.query(Link)
         .filter(
             Link.compte_id == current_account.id,
             Link.provider == "gmail",
+            Link.account_email == gmail_email,
         )
         .first()
     )
@@ -212,7 +228,7 @@ async def google_exchange_code(
         gmail_link = Link(
             compte_id=current_account.id,
             provider="gmail",
-            account_email=current_account.email,
+            account_email=gmail_email,
             oauth_refresh_token=refresh_token,
             access_token=token_data.get("access_token"),
             created_at=datetime.now(UTC),
@@ -221,8 +237,6 @@ async def google_exchange_code(
         db.add(gmail_link)
     else:
         gmail_link.oauth_refresh_token = refresh_token
-        if gmail_link.account_email is None:
-            gmail_link.account_email = current_account.email
         access_token = token_data.get("access_token")
         if isinstance(access_token, str):
             gmail_link.access_token = access_token

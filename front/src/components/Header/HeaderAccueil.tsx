@@ -1,40 +1,64 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import Confirm from "../Confirm/confirm";
-import FlowRankMark from "../FlowRankMark/FlowRankMark";
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import FlowRankMark from '../FlowRankMark/FlowRankMark'
 
 interface HeaderAccueilProps {
-  hideConnexionButton?: boolean;
+  hideConnexionButton?: boolean
+  showSignupButton?: boolean
 }
 
-const HeaderAccueil: React.FC<HeaderAccueilProps> = ({ hideConnexionButton = false }) => {
-  const navigate = useNavigate();
+const HeaderAccueil: React.FC<HeaderAccueilProps> = ({
+  hideConnexionButton = false,
+  showSignupButton = false,
+}) => {
+  const navigate = useNavigate()
 
   function toConnexion() {
-    navigate("/login");
+    navigate('/login')
+  }
+
+  function toSignup() {
+    navigate('/create-account')
   }
 
   return (
-    <header className="bg-main-dark text-white p-4 pt-5 h-10p flex items-center justify-between px-16">
-      <div className="flex items-center gap-3 self-start md:gap-4">
-        <h1 className="bg-gradient-to-r from-yellow-400 to-green-500 bg-clip-text text-transparent text-6xl font-Laila font-bold leading-tight">
-          FlowRank
-        </h1>
-        <FlowRankMark />
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/95 text-white backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="flex min-w-0 items-center gap-2 text-left transition hover:opacity-80 sm:gap-3"
+          aria-label="FlowRank home"
+        >
+          <FlowRankMark className="h-8 w-auto shrink-0 sm:h-10" />
+          <h1 className="bg-gradient-to-r from-yellow-400 to-green-500 bg-clip-text text-transparent text-6xl font-Laila font-bold leading-tight">
+            FlowRank
+          </h1>
+        </button>
+
+        {!hideConnexionButton && (
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {showSignupButton && (
+              <button
+                type="button"
+                onClick={toSignup}
+                className="rounded-md bg-emerald-400 px-3 py-2 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-emerald-300 sm:px-4"
+              >
+                Create account
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={toConnexion}
+              className="rounded-md border border-white/15 bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:border-white/30 hover:bg-white/15 sm:px-4"
+            >
+              Sign in
+            </button>
+          </div>
+        )}
       </div>
-
-      {!hideConnexionButton && (
-        <div className="flex">
-          <Confirm
-            title="Sign in"
-            couleur="green"
-            onClick={toConnexion}
-            classNameAddon="w-48"
-          />
-        </div>
-      )}
     </header>
-  );
-};
+  )
+}
 
-export default HeaderAccueil;
+export default HeaderAccueil

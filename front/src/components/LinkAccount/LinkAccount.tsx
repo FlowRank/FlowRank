@@ -8,7 +8,7 @@ const LierCompte: React.FC = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [checkingLinks, setCheckingLinks] = useState(true);
+  const [checkingSession, setCheckingSession] = useState(true);
   const shouldSignInAgain = errorMessage === "Invalid token";
 
   useEffect(() => {
@@ -17,35 +17,7 @@ const LierCompte: React.FC = () => {
       navigate("/login", { replace: true });
       return;
     }
-
-    let cancelled = false;
-    void (async () => {
-      try {
-        const response = await fetch(`${API_BASE}/links/`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (response.status === 401) {
-          localStorage.removeItem("access_token");
-          if (!cancelled) navigate("/login", { replace: true });
-          return;
-        }
-        if (response.ok) {
-          const data: unknown = await response.json();
-          if (Array.isArray(data) && data.length > 0) {
-            if (!cancelled) navigate("/dashboard", { replace: true });
-            return;
-          }
-        }
-      } catch {
-        /* keep page if check fails */
-      } finally {
-        if (!cancelled) setCheckingLinks(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    setCheckingSession(false);
   }, [navigate]);
 
   const handleSignInAgain = () => {
@@ -93,14 +65,14 @@ const LierCompte: React.FC = () => {
     }
   };
 
-  if (checkingLinks) {
+  if (checkingSession) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-900">
         <HeaderAccueil hideConnexionButton />
         <main className="flex min-h-[calc(100vh-96px)] items-center justify-center px-4 py-10">
           <div className="flex flex-col items-center gap-4 text-slate-300">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
-            <p className="text-sm">Checking your account…</p>
+            <p className="text-sm">Checking your session...</p>
           </div>
         </main>
       </div>
@@ -113,7 +85,7 @@ const LierCompte: React.FC = () => {
       <main className="flex min-h-[calc(100vh-96px)] items-center justify-center px-4 py-10">
         <div className="w-full max-w-md rounded-[32px] border border-white/10 bg-white/90 p-8 shadow-2xl backdrop-blur-xl">
           <h2 className="text-center text-3xl font-semibold text-slate-900 mb-8">
-            Link your account
+            Add a mailbox
           </h2>
           {errorMessage && (
             <p className="mb-4 rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">
@@ -121,12 +93,12 @@ const LierCompte: React.FC = () => {
             </p>
           )}
           <p className="mb-8 text-center text-sm text-slate-500">
-            To finish signing up, link your Google account.
-            Click the button below to continue.
+            Connect another Gmail mailbox to FlowRank. Google will ask which
+            account you want to authorize.
           </p>
           <div className={shouldSignInAgain ? "grid gap-3 sm:grid-cols-2" : "space-y-4"}>
             <Confirm
-              title={isSubmitting ? "Redirecting..." : "Link my account"}
+              title={isSubmitting ? "Redirecting..." : "Connect Gmail"}
               couleur="green"
               onClick={handleLinkAccount}
               classNameAddon="w-full"

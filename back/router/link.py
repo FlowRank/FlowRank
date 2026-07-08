@@ -44,3 +44,19 @@ def get_links(
     links = LinkDao(db).get_by_account_id(current_account.id)
 
     return links
+
+
+@router.delete("/{link_id}")
+def delete_link(
+    link_id: int,
+    db: Session = Depends(get_db),
+    current_account=Depends(get_current_account),
+):
+    link_dao = LinkDao(db)
+    link = link_dao.get_by_id(link_id)
+
+    if link is None or link.compte_id != current_account.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Link not found")
+
+    link_dao.delete(link_id)
+    return {"message": "Mailbox removed"}

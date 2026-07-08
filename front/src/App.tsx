@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import AuthCallback from "./components/AuthCallback/AuthCallback";
 import CreateAccount from "./components/CreateAccount/CreateAccount";
 import Dashboard from "./components/Dashboard/Dashboard";
+import Landing from "./components/Landing/Landing";
 import LinkAccount from "./components/LinkAccount/LinkAccount";
 import Login from "./components/Login/Login";
 
@@ -9,18 +10,18 @@ function tokenPresent() {
   return Boolean(localStorage.getItem("access_token"));
 }
 
-function HomeOrLogin() {
-  return <Navigate to={tokenPresent() ? "/dashboard" : "/login"} replace />;
+function HomeOrLanding() {
+  return tokenPresent() ? <Navigate to="/dashboard" replace /> : <Landing />;
 }
 
 function CatchAll() {
-  return <Navigate to={tokenPresent() ? "/dashboard" : "/login"} replace />;
+  return <Navigate to={tokenPresent() ? "/dashboard" : "/"} replace />;
 }
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomeOrLogin />} />
+      <Route path="/" element={<HomeOrLanding />} />
       <Route path="/login" element={<Login />} />
       <Route path="/create-account" element={<CreateAccount />} />
       <Route path="/link-account" element={<LinkAccount />} />

@@ -10,28 +10,26 @@ const AuthCallback: React.FC = () => {
   const error = searchParams.get("error");
   const code = searchParams.get("code");
   const state = searchParams.get("state");
-  const [status, setStatus] = useState<"pending" | "success" | "failed">("pending");
-  const [detail, setDetail] = useState("");
+  const accessToken = useMemo(() => localStorage.getItem("access_token"), []);
+  const callbackFailure = useMemo(() => {
+    if (error) {
+      return `Account linking failed: ${error}.`;
+    }
+    if (!code || !state) {
+      return "Google callback is incomplete (missing code or state).";
+    }
+    if (!accessToken) {
+      return "Session expired. Sign in again, then restart account linking.";
+    }
+    return "";
+  }, [accessToken, code, error, state]);
+  const [exchangeState, setExchangeState] = useState<{
+    detail: string;
+    status: "pending" | "success" | "failed";
+  }>({ detail: "", status: "pending" });
 
   useEffect(() => {
-    if (error) {
-      setStatus("failed");
-      setDetail(`Account linking failed: ${error}.`);
-      return;
-    }
-
-    if (!code || !state) {
-      setStatus("failed");
-      setDetail("Google callback is incomplete (missing code or state).");
-      return;
-    }
-
-    const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) {
-      setStatus("failed");
-      setDetail("Session expired. Sign in again, then restart account linking.");
-      return;
-    }
+    if (callbackFailure || !accessToken || !code || !state) return;
 
     const controller = new AbortController();
     const exchangeCode = async () => {
@@ -48,24 +46,33 @@ const AuthCallback: React.FC = () => {
 
         const data = (await response.json()) as { message?: string; detail?: string };
         if (!response.ok) {
-          setStatus("failed");
-          setDetail(data.detail ?? "Unable to complete Google account linking.");
+          setExchangeState({
+            detail: data.detail ?? "Unable to complete Google account linking.",
+            status: "failed",
+          });
           return;
         }
 
-        setStatus("success");
-        setDetail(data.message ?? "Google account linked successfully.");
+        setExchangeState({
+          detail: data.message ?? "Google account linked successfully.",
+          status: "success",
+        });
       } catch {
         if (!controller.signal.aborted) {
-          setStatus("failed");
-          setDetail("The server is unavailable. Please try again shortly.");
+          setExchangeState({
+            detail: "The server is unavailable. Please try again shortly.",
+            status: "failed",
+          });
         }
       }
     };
 
     void exchangeCode();
     return () => controller.abort();
-  }, [API_BASE_URL, code, error, state]);
+  }, [API_BASE_URL, accessToken, callbackFailure, code, state]);
+
+  const status = callbackFailure ? "failed" : exchangeState.status;
+  const detail = callbackFailure || exchangeState.detail;
 
   useEffect(() => {
     if (status !== "success") return;

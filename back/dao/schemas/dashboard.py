@@ -22,3 +22,13 @@ class MailOut(BaseModel):
     received_at: datetime | None = None
     created_at: datetime | None = None
     labels: list[LabelOut] = Field(default_factory=list)
+
+
+class MailboxCountOut(BaseModel):
+    link_id: int
+    count: int
+
+
+class DashboardStatsOut(BaseModel):
+    total_count: int
+    by_link: list[MailboxCountOut] = Field(default_factory=list)
