@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { forwardRef, useState } from "react";
 
 type PasswordFieldProps = {
   label: string;
@@ -6,6 +6,7 @@ type PasswordFieldProps = {
   onChange: (value: string) => void;
   placeholder?: string;
   autoComplete?: string;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 const EyeIcon = ({ hidden }: { hidden: boolean }) => (
@@ -25,13 +26,14 @@ const EyeIcon = ({ hidden }: { hidden: boolean }) => (
   </svg>
 );
 
-const PasswordField: React.FC<PasswordFieldProps> = ({
+const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(({
   label,
   value,
   onChange,
   placeholder = "••••••••",
   autoComplete,
-}) => {
+  onKeyDown,
+}, ref) => {
   const [visible, setVisible] = useState(false);
   const toggleLabel = visible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`;
 
@@ -40,9 +42,11 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
       <label className="block text-sm font-medium text-slate-700">{label}</label>
       <div className="relative mt-2">
         <input
+          ref={ref}
           type={visible ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={onKeyDown}
           required
           autoComplete={autoComplete}
           className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 pr-12 text-slate-900 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
@@ -60,6 +64,8 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
       </div>
     </div>
   );
-};
+});
+
+PasswordField.displayName = "PasswordField";
 
 export default PasswordField;
