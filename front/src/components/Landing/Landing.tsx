@@ -236,6 +236,19 @@ const Landing = () => {
           </div>
         </section>
       </main>
+      <footer className="border-t border-white/10 bg-slate-950">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6 text-sm text-slate-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+          <p>FlowRank</p>
+          <div className="flex flex-wrap gap-4">
+            <Link to="/login" className="transition hover:text-slate-300">
+              Sign in
+            </Link>
+            <Link to="/create-account" className="transition hover:text-slate-300">
+              Create account
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

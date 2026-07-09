@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { postAuthRoute } from "../../auth/postLoginRoute";
 import HeaderAccueil from "../Header/HeaderAccueil";
@@ -7,6 +7,9 @@ import PasswordField from "../PasswordField/PasswordField";
 const CreateAccount: React.FC = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
   const navigate = useNavigate();
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
+  const confirmPasswordRef = useRef<HTMLInputElement | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -97,7 +100,7 @@ const CreateAccount: React.FC = () => {
                 {successMessage}
               </p>
             )}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700">
                   Email address
@@ -106,22 +109,42 @@ const CreateAccount: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      passwordRef.current?.focus();
+                    }
+                  }}
                   required
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
                   placeholder="example@mail.com"
                 />
               </div>
               <PasswordField
+                ref={passwordRef}
                 label="Password"
                 value={password}
                 onChange={setPassword}
                 autoComplete="new-password"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    confirmPasswordRef.current?.focus();
+                  }
+                }}
               />
               <PasswordField
+                ref={confirmPasswordRef}
                 label="Confirm password"
                 value={confirmPassword}
                 onChange={setConfirmPassword}
                 autoComplete="new-password"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    formRef.current?.requestSubmit();
+                  }
+                }}
               />
               <button
                 type="submit"
